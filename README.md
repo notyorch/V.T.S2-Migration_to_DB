@@ -22,10 +22,13 @@ El script toma los archivos `data/artists.csv` y `data/tracks.csv` y los carga e
 	- `DB_USER`
 	- `DB_PASSWORD`
 
-3. Ejecutar el script de migracion:
+3. Descomprimir los datos: 
+	* Descomprimir artists.rar
+	* Descomprimir tracks.rar
+
+4. Ejecutar el script de migracion:
 
 	```bash
 	python scripts/load_csv_to_db.py
-	```
 
 El proceso crea o reemplaza las tablas `artists` y `tracks` en la base de datos configurada e inserta todos los registros de ambos CSV.
