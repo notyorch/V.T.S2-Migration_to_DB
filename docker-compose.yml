@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: ${DB_USER:-yorch}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-Y0rch8mN2qLp7sTx}
     ports:
-      - "${DB_BIND_IP:?Set DB_BIND_IP in .env}:5432:5432"
+      - "${DB_BIND_IP:?Set DB_BIND_IP in .env}:${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -56,6 +56,26 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-Y0rch8mN2qLp7sTx}
     ports:
       - "${LAN_BIND_IP:?Set LAN_BIND_IP in .env}:8000:8000"
+
+  streamlit:
+    build: .
+    container_name: spotify_dashboard
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_started
+    environment:
+      API_BASE_URL: http://api:8000
+    command:
+      [
+        "streamlit",
+        "run",
+        "/app/app.py",
+        "--server.address=0.0.0.0",
+        "--server.port=8501",
+      ]
+    ports:
+      - "${LAN_BIND_IP:?Set LAN_BIND_IP in .env}:8501:8501"
 
 volumes:
   postgres_data:
