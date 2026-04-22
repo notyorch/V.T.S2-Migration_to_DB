@@ -1,18 +1,31 @@
 # Spotify Data API
 
-Aplicacion Python con FastAPI y PostgreSQL en Docker.
+Python application using FastAPI and PostgreSQL in Docker.
 
-El proyecto queda listo para simular un servidor externo dentro de tu red local (LAN), sin exponer el servicio a internet de forma directa.
+This project simulates an external API server inside your local network (LAN) without exposing the service directly to the internet.
 
-## Arquitectura
+Made by:
+* Jorge Enrique Vargas Pech | 2409244
+* Jose Luis Rejón Quintal | 2409209
+* William Emmanuel Fernández Castillo | 2409089
+* Saúl Ruiz Peña | 2409218
 
-- `api` (FastAPI): contenedor `spotify_api`
-- `postgres` (PostgreSQL): contenedor `spotify_db`
-- Red de Docker Compose interna para comunicación entre servicios
-- API expuesta en IP LAN específica (`LAN_BIND_IP:8000`)
-- Base de datos expuesta en IP LAN específica (`DB_BIND_IP:5432`) para clientes externos como Power BI
+***
 
-## Estructura del proyecto
+## Architecture
+
+- `api` (FastAPI): container `spotify_api`  
+- `postgres` (PostgreSQL): container `spotify_db`  
+- Internal Docker Compose network for service communication  
+- API exposed on a specific LAN IP (`LAN_BIND_IP:8000`)  
+- Database exposed on a specific LAN IP (`DB_BIND_IP:5432`) for external clients such as Power BI  
+
+![Docker Compose Stack Running](/screenshots/docker-compose-ps.png)
+(Containers `spotify_api`, `spotify_db`, `seed_db` in running/healthy state)
+
+***
+
+## Project Structure
 
 ```text
 phase3/
@@ -34,165 +47,230 @@ phase3/
 └── README.md
 ```
 
-## Variables de entorno
+![Project Structure](/screenshots/project-structure.png)
 
-Crea `.env` a partir de `.env.example`.
+***
+
+## Environment Variables
+
+Create a `.env` file from `.env.example`:
 
 ```bash
 cp .env.example .env
 ```
 
-Configura estos valores:
+Configure these values:
 
-- `DB_HOST`
-- `DB_PORT`
-- `DB_NAME`
-- `DB_USER`
-- `DB_PASSWORD`
-- `LAN_BIND_IP`
-- `DB_BIND_IP`
+- `DB_HOST`  
+- `DB_PORT`  
+- `DB_NAME`  
+- `DB_USER`  
+- `DB_PASSWORD`  
+- `LAN_BIND_IP`  
+- `DB_BIND_IP`  
 
-Valores por defecto sugeridos:
+Suggested defaults:
 
-- `DB_USER=yorch`
-- `DB_PASSWORD=Y0rch8mN2qLp7sTx`
+- `DB_USER=yorch`  
+- `DB_PASSWORD=Y0rch8mN2qLp7sTx`  
 
-Notas importantes:
+Important notes:
 
-- Si la API corre dentro de Docker Compose, `DB_HOST` se resuelve al servicio `postgres`.
-- Si corres scripts desde host hacia DB dockerizada, usa `DB_HOST=localhost`.
-- `LAN_BIND_IP` debe ser la IP LAN real de tu equipo (ejemplo: `192.168.1.75`).
-- `DB_BIND_IP` debe ser la IP LAN real de tu equipo cuando quieras conectar clientes externos a PostgreSQL.
+- When the API runs inside Docker Compose, `DB_HOST` should be the service name `postgres`.  
+- When running scripts from the host to the Dockerized DB, use `DB_HOST=localhost`.  
+- `LAN_BIND_IP` must be your actual LAN IP (e.g. `192.168.1.75`).  
+- `DB_BIND_IP` must be your actual LAN IP when you want external clients (e.g. Power BI) to connect to PostgreSQL.
 
-## Endpoints disponibles
+***
 
-Base URL:
+## Available Endpoints
 
-- LAN: `http://<LAN_BIND_IP>:8000`
+Base URL (LAN):
+
+- `http://<LAN_BIND_IP>:8000`
 
 Endpoints:
 
-1. `GET /`
-2. `GET /health`
+1. `GET /`  
+2. `GET /health`  
 
-Documentacion interactiva:
+Interactive documentation:
 
-- Swagger: `http://<LAN_BIND_IP>:8000/docs`
-- ReDoc: `http://<LAN_BIND_IP>:8000/redoc`
+- Swagger: `http://<LAN_BIND_IP>:8000/docs`  
+- ReDoc: `http://<LAN_BIND_IP>:8000/redoc`  
 
-## Opcion A: Ejecutar todo con Docker Compose (recomendado)
+**Screenshot placeholders:**  
+> `![Swagger UI - FastAPI docs](./images/swagger-docs.png)`  
+> `![Sample /health response in Swagger](./images/swagger-health.png)`
 
-1. Levantar servicios:
+***
+
+## Option A: Run Everything with Docker Compose (recommended)
+
+1. Start all services:
 
 ```bash
 docker compose up -d --build
 ```
 
-2. Verificar estado:
+2. Check container status:
 
 ```bash
 docker compose ps
 ```
 
-3. Esperar la inicializacion de datos:
+3. Wait for data initialization:
 
 ```bash
 docker compose logs -f seed_db
 ```
 
-`seed_db` descomprime `artists.rar` y `tracks.rar` automaticamente, luego ejecuta la carga en PostgreSQL.
+The `seed_db` service automatically extracts `artists.rar` and `tracks.rar` and then loads the data into PostgreSQL.
 
-4. Probar API:
+4. Test the API:
 
 ```bash
 curl http://<LAN_BIND_IP>:8000/health
 curl http://<LAN_BIND_IP>:8000/
 ```
 
-5. Detener servicios:
+5. Stop all services:
 
 ```bash
 docker compose down
 ```
 
-## Opcion B: DB en Docker y API en host
+**Screenshot placeholder:**  
+> `![seed_db logs loading data](./images/seed-db-logs.png)`
 
-1. Levantar solo PostgreSQL:
+***
+
+## Option B: DB in Docker, API on Host
+
+1. Start only PostgreSQL:
 
 ```bash
 docker compose up -d postgres
 ```
 
-2. Entorno Python local:
+2. Set up local Python environment:
 
 ```bash
-python3 -m venv .venv
+python -m venv .venv
+# On Windows:
+.venv\Scripts\activate
+# On Linux/macOS:
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-3. Confirmar `.env` con `DB_HOST=localhost`.
+3. Confirm `.env` has `DB_HOST=localhost`.
 
-4. Cargar CSV:
+4. Load CSV data into PostgreSQL:
 
 ```bash
 python scripts/load_csv_to_db.py
 ```
 
-5. Ejecutar API expuesta en LAN:
+5. Run the API exposed on the LAN:
 
 ```bash
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-## Seguridad de red (LAN, no internet)
+***
 
-- La API se publica en la IP indicada por `LAN_BIND_IP`, no en todas las interfaces.
-- PostgreSQL se publica en `DB_BIND_IP:5432` para permitir acceso desde la LAN (ejemplo: Power BI en otra maquina).
-- Mientras no abras puertos en router (port forwarding), no queda expuesto a internet.
+## Network Security (LAN, not Internet)
 
-## Conectar Power BI a PostgreSQL
+- The API is bound only to the IP specified by `LAN_BIND_IP`, not to all interfaces.  
+- PostgreSQL is exposed on `DB_BIND_IP:5432` to allow access from the LAN (e.g. Power BI on another machine).  
+- As long as you do not configure port forwarding on your router, the services are **not** exposed to the public internet.
 
-1. Levanta el stack:
+***
+
+## Connecting to the Streamlit Dashboard
+
+1. Start the stack:
 
 ```bash
 docker compose up -d --build
 ```
 
-2. En Power BI Desktop, usa el conector **PostgreSQL database**.
+2. Open your browser at http://localhost:8501
 
-3. Configura estos valores:
 
-- Server: `<DB_BIND_IP>:5432`
-- Database: `musicdb`
-- Username: `yorch`
-- Password: `Y0rch8mN2qLp7sTx`
+3. Use the **Filtros** button (top-right) to filter by:
+   - **Año de lanzamiento** — release year range
+   - **Artistas** — search and select specific artists
+   - **Muestra scatter** — sample size for the Danceability vs Energy chart (100–10,000 points)
 
-4. Carga las tablas `artists` y `tracks`.
+4. Available charts:
 
-5. Si Power BI esta en otra maquina, abre firewall solo para esa IP en el puerto 5432.
+   - **Top 10 canciones** — median popularity ranking for the selected period
+   - **Danceability vs Energy** — scatter plot colored by popularity (random sample)
+   - **Evolución de popularidad** — average popularity trend over time
 
-## Comandos utiles
 
-Logs de API:
+> **Note:** `Artistas únicos` (98,504) counts distinct artists parsed from `public.tracks`, not the full `public.artists` catalog (1,104,349). This reflects artists with at least one song in the analyzed dataset.
+
+![Spotify Analytics Dashboard](/screenshots/streamlit-dashboard.png)
+
+Spotify Analytics — exploratory dashboard powered by Streamlit + FastAPI + PostgreSQL
+***
+
+## Connecting Power BI to PostgreSQL
+
+1. Start the stack:
+
+```bash
+docker compose up -d --build
+```
+
+2. In Power BI Desktop, choose the **PostgreSQL database** connector.
+
+3. Use these values:
+
+- Server: `<DB_BIND_IP>:5432`  
+- Database: `musicdb`  
+- Username: `yorch`  
+- Password: `Y0rch8mN2qLp7sTx`  
+
+4. Load the `artists` and `tracks` tables.
+
+5. If Power BI runs on another machine, open the firewall only for that specific IP on port `5432`.
+
+![PowerBI PostgreSQL connection dialog](/screenshots/powerbi-connection.png)
+
+PowerBI PostgreSQL connection dialog 
+
+![PowerBI simple report using artists & tracks db](/screenshots/powerbi-report.png)
+Simple PowerBI report using artists & tracks db
+***
+
+
+
+
+## Useful Commands
+
+API logs:
 
 ```bash
 docker compose logs -f api
 ```
 
-Logs de DB:
+Database logs:
 
 ```bash
 docker compose logs -f postgres
 ```
 
-Logs de carga inicial:
+Initial data load logs:
 
 ```bash
 docker compose logs -f seed_db
 ```
 
-Recrear stack:
+Recreate the stack:
 
 ```bash
 docker compose down
