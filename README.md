@@ -1,5 +1,7 @@
 # Spotify Data API
 
+![Spotify Logo PNG](https://storage.googleapis.com/pr-newsroom-wp/1/2023/05/Spotify_Full_Logo_RGB_Green.png)
+
 Python application using FastAPI and PostgreSQL in Docker.
 
 This project simulates an external API server inside your local network (LAN) without exposing the service directly to the internet.
