@@ -1,6 +1,9 @@
 # Spotify Data API
 
-![Spotify Logo PNG](https://storage.googleapis.com/pr-newsroom-wp/1/2023/05/Spotify_Full_Logo_RGB_Green.png)
+<p>
+  <img src="https://storage.googleapis.com/pr-newsroom-wp/1/2023/05/Spotify_Full_Logo_RGB_Green.png" alt="Spotify Logo" width="200" hspace="10">
+  <img src="https://static.wixstatic.com/media/c6cbd8_e692ac3a7d78405fa0fa788bac52a1ad~mv2.png/v1/crop/x_0,y_337,w_3000,h_1426/fill/w_267,h_107,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/logotipo%20completo_color.png" alt="UPY Logo" width="200" hspace="10">
+</p>
 
 Python application using FastAPI and PostgreSQL in Docker.
 
