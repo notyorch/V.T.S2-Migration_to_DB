@@ -26,7 +26,7 @@ Made by:
 - Database exposed on a specific LAN IP (`DB_BIND_IP:5432`) for external clients such as Power BI  
 
 ![Docker Compose Stack Running](/screenshots/docker-compose-ps.png)
-(Containers `spotify_api`, `spotify_db`, `seed_db` in running/healthy state)
+(Containers `spotify_api`, `spotify_db`, `spotify_dashboard` in running/healthy state)
 
 ***
 
@@ -96,8 +96,14 @@ Base URL (LAN):
 
 Endpoints:
 
-1. `GET /`  
-2. `GET /health`  
+1. `GET /` - basic API status message  
+2. `GET /health` - database connectivity check  
+3. `GET /kpis` - dashboard KPIs with optional filters by year and artist  
+4. `GET /charts/trend-songs` - top 10 songs by median popularity  
+5. `GET /charts/dance-vs-energy` - scatter plot dataset for danceability vs energy  
+6. `GET /charts/popularity-over-time` - average popularity by year  
+7. `GET /filters/artists` - artist list for the dashboard filter  
+8. `GET /filters/year-range` - min/max release year for the dashboard filter  
 
 Interactive documentation:
 
@@ -124,13 +130,13 @@ docker compose up -d --build
 docker compose ps
 ```
 
-3. Wait for data initialization:
+3. Wait for automatic initialization:
 
 ```bash
-docker compose logs -f seed_db
+docker compose logs -f api
 ```
 
-The `seed_db` service automatically extracts `artists.rar` and `tracks.rar` and then loads the data into PostgreSQL.
+On startup, the `api` container waits for PostgreSQL, extracts `artists.rar` and `tracks.rar` if needed, loads the data when the tables are missing, and then starts FastAPI automatically.
 
 4. Test the API:
 
@@ -146,7 +152,7 @@ docker compose down
 ```
 
 **Screenshot placeholder:**  
-> `![seed_db logs loading data](./images/seed-db-logs.png)`
+> `![api logs loading data on first boot](./images/api-bootstrap-logs.png)`
 
 ***
 
@@ -269,10 +275,10 @@ Database logs:
 docker compose logs -f postgres
 ```
 
-Initial data load logs:
+Automatic bootstrap logs:
 
 ```bash
-docker compose logs -f seed_db
+docker compose logs -f api
 ```
 
 Recreate the stack:

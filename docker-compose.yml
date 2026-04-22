@@ -19,26 +19,6 @@ services:
       timeout: 5s
       retries: 10
 
-  seed_db:
-    build: .
-    container_name: spotify_seed_db
-    restart: "no"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: ${DB_NAME:-musicdb}
-      DB_USER: ${DB_USER:-yorch}
-      DB_PASSWORD: ${DB_PASSWORD:-Y0rch8mN2qLp7sTx}
-    command:
-      [
-        "sh",
-        "-c",
-        "unrar-free x -o+ /app/data/artists.rar /app/data && unrar-free x -o+ /app/data/tracks.rar /app/data && python /app/scripts/load_csv_to_db.py",
-      ]
-
   api:
     build: .
     container_name: spotify_api
@@ -46,8 +26,12 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      seed_db:
-        condition: service_completed_successfully
+    command:
+      [
+        "sh",
+        "-c",
+        "python /app/scripts/bootstrap_api.py && uvicorn app.main:app --host 0.0.0.0 --port 8000",
+      ]
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
@@ -56,6 +40,18 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-Y0rch8mN2qLp7sTx}
     ports:
       - "${LAN_BIND_IP:?Set LAN_BIND_IP in .env}:8000:8000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
 
   streamlit:
     build: .
@@ -63,7 +59,7 @@ services:
     restart: unless-stopped
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
     environment:
       API_BASE_URL: http://api:8000
     command:
