@@ -1,0 +1,61 @@
+name: spotify_db
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: spotify_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-musicdb}
+      POSTGRES_USER: ${DB_USER:-yorch}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-Y0rch8mN2qLp7sTx}
+    ports:
+      - "${DB_BIND_IP:?Set DB_BIND_IP in .env}:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-yorch} -d ${DB_NAME:-musicdb}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  seed_db:
+    build: .
+    container_name: spotify_seed_db
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-musicdb}
+      DB_USER: ${DB_USER:-yorch}
+      DB_PASSWORD: ${DB_PASSWORD:-Y0rch8mN2qLp7sTx}
+    command:
+      [
+        "sh",
+        "-c",
+        "unrar-free x -o+ /app/data/artists.rar /app/data && unrar-free x -o+ /app/data/tracks.rar /app/data && python /app/scripts/load_csv_to_db.py",
+      ]
+
+  api:
+    build: .
+    container_name: spotify_api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      seed_db:
+        condition: service_completed_successfully
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-musicdb}
+      DB_USER: ${DB_USER:-yorch}
+      DB_PASSWORD: ${DB_PASSWORD:-Y0rch8mN2qLp7sTx}
+    ports:
+      - "${LAN_BIND_IP:?Set LAN_BIND_IP in .env}:8000:8000"
+
+volumes:
+  postgres_data:
