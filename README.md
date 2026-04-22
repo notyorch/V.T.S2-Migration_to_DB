@@ -111,8 +111,9 @@ Interactive documentation:
 - ReDoc: `http://<LAN_BIND_IP>:8000/redoc`  
 
 **Screenshot placeholders:**  
-> `![Swagger UI - FastAPI docs](./images/swagger-docs.png)`  
-> `![Sample /health response in Swagger](./images/swagger-health.png)`
+![Swagger UI - FastAPI docs](/screenshots/swagger-docs.png)  
+![Sample /health response in Swagger](/screenshots/swagger-health.png)
+![ReDOc UI](/screenshots/redoc.png)
 
 ***
 
@@ -151,8 +152,8 @@ curl http://<LAN_BIND_IP>:8000/
 docker compose down
 ```
 
-**Screenshot placeholder:**  
-> `![api logs loading data on first boot](./images/api-bootstrap-logs.png)`
+`![api logs loading data on first boot](/screenshots/api-bootstrap-logs.png)
+API logs loading data on first boot
 
 ***
 
