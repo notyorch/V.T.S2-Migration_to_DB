@@ -1,4 +1,4 @@
-# Spotify Data API
+# Spotify Data Dashboard - 1921 - 2020
 
 <p>
   <img src="https://storage.googleapis.com/pr-newsroom-wp/1/2023/05/Spotify_Full_Logo_RGB_Green.png" alt="Spotify Logo" width="200" hspace="10">
@@ -288,3 +288,6 @@ Recreate the stack:
 docker compose down
 docker compose up -d --build
 ```
+
+Data Source:
+![Spotify Dataset 1921-2020, 600k+ Tracks](/https://www.kaggle.com/datasets/yamaerenay/spotify-dataset-19212020-600k-tracks)
